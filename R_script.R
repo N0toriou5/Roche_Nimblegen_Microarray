@@ -392,3 +392,20 @@ regulon <- corto(expmat, centroids = centroids, nbootstraps = 1000,
                  nthreads = 4,
                  verbose = TRUE)
 save(regulon, file = "results/TARGET_regulon.rda")
+
+### msVIPER MRA
+# Calculate basic signature treatment vs. control
+sig <- rowTtest(trt,ctr)$statistic[,1] 
+
+# Sanity check: remove eventually NaN
+sig <- sig[!is.nan(sig)]
+sig <- sig[!is.na(sig)]
+
+# Calculate a robust signature using permutation of dataset
+dnull <- ttestNull(trt, ctr, per = 1000) 
+# Only 100 permutations to reduce computation time, but it is recommended to perform at least 1000 permutations
+summary(as.vector(dnull))
+dnull[is.na(dnull)] <- 0 # permutations introduce NaN's, put these 397 NaNs to 0 (median of distribution)
+
+# Run master regulator analysis
+mra <- msviper(sig, regulon = regulon, dnull, minsize = 20)
