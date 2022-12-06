@@ -4,7 +4,9 @@
 
 setwd("D:/Projects/ABCC3/")
 library(affycoretools)
+library(corto)
 library(hgu133plus2.db)
+library(minet)
 library(oligo)
 library(pd.hg.u133.plus.2)
 celFiles <- list.celfiles("GSE16476_RAW/", listGzipped=TRUE)
@@ -33,4 +35,10 @@ regulon <- corto(expmat, centroids = centroids, nbootstraps = 1000,
                  p = 1e-06,
                  nthreads = 8,
                  verbose = TRUE)
+save(regulon, file = "results/versteeg_regulon.rda")
+
+### Use ARACNe from Califano lab
+mim <- build.mim(t(expmat),estimator="spearman")
+regulon <- aracne(mim)
+save(regulon, file = "results/versteeg_regulon-aracne.rda")
 save(regulon, file = "results/versteeg_regulon.rda")
