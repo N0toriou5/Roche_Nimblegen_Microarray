@@ -384,14 +384,8 @@ emt <- c("TWIST1", "SNAI1", "SNAI2", "SNAI3", "ZEB1", "ZEB2", "HIF1A", "PRRX1", 
 trt <- rawbe[, 5:6]
 ctr <- rawbe[, 1:2]
 
-#### Create a TARGET regulon with corto
-load("D:/Datasets/Expression/Neuroblastoma/target_NBL-expmat.rda") #27905   168
-load("D:/Datasets/Expression/Liste/tfs_2022.rda")
-regulon <- corto(expmat, centroids = centroids, nbootstraps = 1000,
-                 p = 1e-06,
-                 nthreads = 4,
-                 verbose = TRUE)
-save(regulon, file = "results/TARGET_regulon.rda")
+#### Load the Versteeg regulon
+load("results/versteeg_regulon.rda") 
 
 ### msVIPER MRA
 # Calculate basic signature treatment vs. control
