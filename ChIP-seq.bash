@@ -33,3 +33,14 @@ samtools sort -m 2G -@ 10 -O BAM -o input.sorted.bam input.bam
 samtools index input.sorted.bam
 samtools sort -m 2G -@ 10 -O BAM -o tead4.sorted.bam tead4.bam
 samtools index tead4.sorted.bam
+
+# Markup and remove duplicates
+ PicardCommandLine MarkDuplicates \
+ REMOVE_DUPLICATES=TRUE \
+ I="tead4.sorted.bam" O=tead4_NODUPS.bam \
+ M=tead4_dup_metrics.txt 
+
+ PicardCommandLine MarkDuplicates \
+ REMOVE_DUPLICATES=TRUE \
+ I="input.sorted.bam" O=input_NODUPS.bam \
+ M=input_dup_metrics.txt 
