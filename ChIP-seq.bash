@@ -44,3 +44,41 @@ samtools index tead4.sorted.bam
  REMOVE_DUPLICATES=TRUE \
  I="input.sorted.bam" O=input_NODUPS.bam \
  M=input_dup_metrics.txt 
+
+# Blacklist regions
+
+# ENCODE blacklists (save and unzip hg38)
+# from http://mitra.stanford.edu/kundaje/akundaje/release/blacklists/
+
+
+# Blacklist with ENCODE regions
+bl=/mnt/f/genomes/Human/blacklist/hg38.blacklist.bed
+
+# Filter out black lists
+mkdir filtered
+bedtools intersect -v -abam input_NODUPS.bam -b $bl > filtered/input.filtered.bam
+bedtools intersect -v -abam tead4_NODUPS.bam -b $bl > filtered/tead4.filtered.bam
+samtools index filtered/input.filtered.bam
+samtools index filtered/tead4.filtered.bam
+
+
+#Call MACS peaks (one to one samples)
+cd filtered
+macs2 callpeak -t tead4.filtered.bam \
+-c input.filtered.bam \
+-f BAM -g hs -n tead4 -B -p 1e-9 --outdir macs_tead4 --verbose 2 --bdg 
+
+# Prepare a bed file centered on transcript TSSs
+gff3=/mnt/f/genomes/Human/annotations/gencode.v36.annotation.gff3
+# Select only transcripts
+grep -P "\ttranscript\t" $gff3 > alltranscripts_coords.bed
+cut -f3 alltranscripts_coords.bed | sort | uniq
+
+cd /mnt/h/ABCC3/ChIP
+# Remove redundant genes in custom .bed file
+uniq up.bed > tmp && mv tmp genesup.bed
+less -S genesup.bed | wc -l
+uniq dn.bed > tmp && mv tmp genesdn.bed
+uniq nonhit.bed > tmp && mv tmp genesnot.bed
+
+# Starting the heatmap plot on TSS (center) <- center on TSS signals
