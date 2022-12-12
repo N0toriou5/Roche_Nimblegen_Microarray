@@ -403,3 +403,80 @@ dnull[is.na(dnull)] <- 0 # permutations introduce NaN's, put these 397 NaNs to 0
 
 # Run master regulator analysis
 mra <- msviper(sig, regulon = regulon, dnull, minsize = 20)
+
+# Create the gene coordinate bed file
+# upload coord file produced by ChIP.bash script
+bedfile <- read.delim("alltranscripts_coords.bed",header=F,sep="\t", stringsAsFactors = F)
+
+# Extract gene name (Entrez ID)
+tmp <- strsplit(bedfile[,9],";")
+tmp <- sapply(tmp,function(x){
+  return(x[6])
+})
+gene_names <- gsub("gene_name=","", tmp)
+
+load("genelists.rda")
+setdiff(list1, gene_names)
+source("F:/Archive/geneids.R")
+listup <- any2entrez(list1)
+upgenes <- eg2sym(listup)
+upgenes <- na.omit(upgenes)
+listdn <- any2entrez(list2)
+dngenes <- eg2sym(listdn)
+dngenes <- na.omit(dngenes)
+setdiff(upgenes, gene_names)
+
+hitgenes_up <- upgenes
+hitgenes_dn <- dngenes
+
+# Prepare three output files
+bedupfile <- "up.bed"
+beddnfile <- "dn.bed"
+bednonhitfile <- "nonhit.bed"
+
+# Delete them
+unlink(c(bedupfile, beddnfile, bednonhitfile))
+
+pb <- txtProgressBar(0,nrow(bedfile),style=3)
+
+for (i in 1:nrow(bedfile)){
+  setTxtProgressBar(pb,i)
+  myrow <- bedfile[i,]
+  tmp <- strsplit(myrow[,9],";")
+  tmp <- sapply(tmp,function(x){
+    return(x[6])
+  })
+  gene_name<-gsub("gene_name=","",tmp)
+  
+  # Print a new line (chr start end)
+  newline <- rep(NA,4)
+  newline[1] <- myrow[,1]
+  newline[4] <- gene_name
+  
+  # Check strand
+  if(myrow[,7]=="+"){
+    newline[2] <- as.numeric(myrow[,4])
+    newline[3] <- as.numeric(myrow[,4]+1)
+  } else {
+    newline[2] <- as.numeric(myrow[,5])
+    newline[3] <- as.numeric(myrow[,5]+1)
+  }
+  
+  
+  # Check hit gene
+  if(gene_name%in%hitgenes_up){
+    cat(newline,file=bedupfile,sep="\t",append=TRUE)
+    cat("\n",file=bedupfile,sep="\t",append=TRUE)
+  } else if(gene_name%in%hitgenes_dn){
+    cat(newline,file=beddnfile,sep="\t",append=TRUE)
+    cat("\n",file=beddnfile,sep="\t",append=TRUE)
+    
+  } else {
+    cat(newline,file=bednonhitfile,sep="\t",append=TRUE)
+    cat("\n",file=bednonhitfile,sep="\t",append=TRUE)
+    
+  }
+  
+  
+}
+
