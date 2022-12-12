@@ -64,7 +64,7 @@ samtools index filtered/tead4.filtered.bam
 
 #Call MACS peaks (one to one samples)
 cd filtered
-macs2 callpeak -t tead4.filtered.bam \
+macs3 callpeak -t tead4.filtered.bam \
 -c input.filtered.bam \
 -f BAM -g hs -n tead4 -B -p 1e-9 --outdir macs_tead4 --verbose 2 --bdg 
 
