@@ -82,3 +82,7 @@ uniq dn.bed > tmp && mv tmp genesdn.bed
 uniq nonhit.bed > tmp && mv tmp genesnot.bed
 
 # Starting the heatmap plot on TSS (center) <- center on TSS signals
+# Files needed:
+### BAM from ChIP-Seq (TEAD4)
+### BAM from input
+### BED file with TSS coordinates
