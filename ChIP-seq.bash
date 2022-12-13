@@ -86,3 +86,15 @@ uniq nonhit.bed > tmp && mv tmp genesnot.bed
 ### BAM from ChIP-Seq (TEAD4)
 ### BAM from input
 ### BED file with TSS coordinates
+
+cd /mnt/d/projects/ABCC3/ChIP/bowtie/filtered
+# Calculate number of aligned reads
+samtools flagstat "input.filtered.bam"  # 41135748
+samtools flagstat "tead4.filtered.bam" # 47087786
+
+# Convert BAM to BigWig
+bamCoverage -p 6 -b "input.filtered.bam"  -o input.bw --scaleFactor 1
+bamCoverage -p 6 -b "tead4.filtered.bam" -o tead4.bw --scaleFactor 0.8735 # That is, 41135748/47087786
+
+# Subtract input from signal
+bigwigCompare -b1 tead4.bw -b2 input.bw --operation subtract -p 6 -o tead4_diff.bw
