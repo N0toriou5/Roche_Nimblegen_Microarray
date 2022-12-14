@@ -100,6 +100,7 @@ bamCoverage -p 6 -b "tead4.filtered.bam" -o tead4.bw --scaleFactor 0.8735 # That
 bigwigCompare -b1 tead4.bw -b2 input.bw --operation subtract -p 6 -o tead4_diff.bw
 
 # Choose reference point
+mkdir plots
 bedup=/mnt/d/projects/ABCC3/ChIP/bowtie/filtered/genesup.bed
 beddn=/mnt/d/projects/ABCC3/ChIP/bowtie/filtered/genesdn.bed
 bednot=/mnt/d/projects/ABCC3/ChIP/bowtie/filtered/genesnot.bed
