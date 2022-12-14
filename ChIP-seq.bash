@@ -74,7 +74,7 @@ gff3=/mnt/f/genomes/Human/annotations/gencode.v36.annotation.gff3
 grep -P "\ttranscript\t" $gff3 > alltranscripts_coords.bed
 cut -f3 alltranscripts_coords.bed | sort | uniq
 
-cd /mnt/h/ABCC3/ChIP
+cd /mnt/d/projects/ABCC3/ChIP/bowtie/filtered/
 # Remove redundant genes in custom .bed file
 uniq up.bed > tmp && mv tmp genesup.bed
 less -S genesup.bed | wc -l
@@ -98,3 +98,33 @@ bamCoverage -p 6 -b "tead4.filtered.bam" -o tead4.bw --scaleFactor 0.8735 # That
 
 # Subtract input from signal
 bigwigCompare -b1 tead4.bw -b2 input.bw --operation subtract -p 6 -o tead4_diff.bw
+
+# Choose reference point
+bedup=/mnt/d/projects/ABCC3/ChIP/bowtie/filtered/genesup.bed
+beddn=/mnt/d/projects/ABCC3/ChIP/bowtie/filtered/genesdn.bed
+bednot=/mnt/d/projects/ABCC3/ChIP/bowtie/filtered/genesnot.bed
+computeMatrix reference-point -p4 -S tead4_diff.bw -R $bedup -a 10000 -b 10000 --referencePoint center -o upanalysis.mat.gz
+computeMatrix reference-point -p4 -S tead4_diff.bw -R $beddn -a 10000 -b 10000 --referencePoint center -o dnanalysis.mat.gz
+computeMatrix reference-point -p4 -S tead4_diff.bw -R $bednot -a 10000 -b 10000 --referencePoint center -o notanalysis.mat.gz
+
+# Plot
+plotHeatmap -m upanalysis.mat.gz -out plots/001_deeptools_up.png --averageTypeSummaryPlot mean \
+--heatmapHeight 13 --heatmapWidth 6 --whatToShow "heatmap and colorbar" \
+--colorList 'navajowhite,orange,black' \
+--refPointLabel "TEAD4 peak centers" --plotTitle "ABCC3 targets vs. TEAD4 ChIP-Seq" \
+--xAxisLabel "Distance from TSS center (bp)" --yAxisLabel "peaks" \
+--dpi 600
+
+plotHeatmap -m dnanalysis.mat.gz -out plots/001_deeptools_dn.png --averageTypeSummaryPlot mean \
+--heatmapHeight 13 --heatmapWidth 6 --whatToShow "heatmap and colorbar" \
+--colorList 'navajowhite,orange,black' \
+--refPointLabel "TEAD4 peak centers" --plotTitle "ABCC3 targets vs. TEAD4 ChIP-Seq" \
+--xAxisLabel "Distance from TSS center (bp)" --yAxisLabel "peaks" \
+--dpi 600
+
+plotHeatmap -m notanalysis.mat.gz -out plots/001_deeptools_not.png --averageTypeSummaryPlot mean \
+--heatmapHeight 13 --heatmapWidth 6 --whatToShow "heatmap and colorbar" \
+--colorList 'navajowhite,orange,black' \
+--refPointLabel "TEAD4 peak centers" --plotTitle "ABCC3 targets vs. TEAD4 ChIP-Seq" \
+--xAxisLabel "Distance from TSS center (bp)" --yAxisLabel "peaks" \
+--dpi 600
